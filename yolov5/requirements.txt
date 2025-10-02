@@ -8,9 +8,22 @@ pillow
 PyYAML>=5.3
 scipy>=1.4.1
 tensorboard>=2.2
-torch>=1.6.0
-torchvision>=0.7.0
+torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2 
 tqdm>=4.41.0
+ultralytics
+tensorflow
+onnx
+tf2onnx
+thop
+seaborn
+pandas
+requests
+psutil
+sympy
+networkx
+gitpython
+ipykernel
+jupyter_core
 
 # Conda commands (in place of pip) ---------------------------------------------
 # conda update -yn base -c defaults conda

@@ -219,7 +219,31 @@ class LoadWebcam:  # for inference
 
 
 class LoadStreams:  # multiple IP or RTSP cameras
+    """
+    Lớp LoadStreams dùng để tải và xử lý luồng video từ nhiều camera IP hoặc RTSP.
+
+    Lớp này khởi tạo các luồng để đọc frames từ các nguồn video (webcam hoặc streams),
+    và cung cấp iterator để lấy frames đã xử lý cho inference.
+
+    Thuộc tính:
+        mode (str): Chế độ hoạt động, mặc định là 'images'.
+        img_size (int): Kích thước hình ảnh để resize.
+        imgs (list): Danh sách lưu trữ frames hiện tại từ mỗi stream.
+        sources (list): Danh sách các nguồn video (URLs hoặc device IDs).
+    """
+
     def __init__(self, sources='streams.txt', img_size=640):
+        """
+        Khởi tạo LoadStreams với các nguồn video và kích thước hình ảnh.
+
+        Args:
+            sources (str hoặc list): Đường dẫn đến file chứa danh sách streams hoặc danh sách trực tiếp.
+                                   Nếu là file, đọc từng dòng làm nguồn. Nếu không, coi là nguồn duy nhất.
+            img_size (int): Kích thước để resize hình ảnh cho inference (mặc định 640).
+
+        Raises:
+            AssertionError: Nếu không thể mở nguồn video.
+        """
         self.mode = 'images'
         self.img_size = img_size
 
@@ -253,6 +277,16 @@ class LoadStreams:  # multiple IP or RTSP cameras
             print('WARNING: Different stream shapes detected. For optimal performance supply similarly-shaped streams.')
 
     def update(self, index, cap):
+        """
+        Cập nhật frames từ stream trong một daemon thread.
+
+        Phương thức này chạy trong background để liên tục đọc frames từ video capture,
+        chỉ lưu mỗi frame thứ 4 để giảm tải xử lý.
+
+        Args:
+            index (int): Chỉ số của stream trong danh sách.
+            cap (cv2.VideoCapture): Đối tượng VideoCapture của OpenCV.
+        """
         # Read next stream frame in a daemon thread
         n = 0
         while cap.isOpened():
@@ -265,10 +299,29 @@ class LoadStreams:  # multiple IP or RTSP cameras
             time.sleep(0.01)  # wait time
 
     def __iter__(self):
+        """
+        Khởi tạo iterator cho LoadStreams.
+
+        Returns:
+            LoadStreams: Đối tượng iterator.
+        """
         self.count = -1
         return self
 
     def __next__(self):
+        """
+        Lấy batch tiếp theo của frames đã xử lý từ tất cả streams.
+
+        Returns:
+            tuple: (sources, img, img0, None) chứa:
+                - sources: Danh sách nguồn video
+                - img: Tensor hình ảnh đã xử lý (BGR->RGB, transposed)
+                - img0: Hình ảnh gốc
+                - None: Placeholder cho metadata
+
+        Raises:
+            StopIteration: Khi nhấn 'q' để thoát.
+        """
         self.count += 1
         img0 = self.imgs.copy()
         if cv2.waitKey(1) == ord('q'):  # q to quit
@@ -288,6 +341,12 @@ class LoadStreams:  # multiple IP or RTSP cameras
         return self.sources, img, img0, None
 
     def __len__(self):
+        """
+        Trả về độ dài của dataset (không giới hạn cho streams).
+
+        Returns:
+            int: 0 (đại diện cho infinite frames).
+        """
         return 0  # 1E12 frames = 32 streams at 30 FPS for 30 years
 
 

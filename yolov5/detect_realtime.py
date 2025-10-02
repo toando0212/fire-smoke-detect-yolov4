@@ -49,7 +49,7 @@ def run_webcam(cam_id, model, device, imgsz, half, opt):
                 for *xyxy, conf, cls in det:
                     label = '%s %.2f' % (names[int(cls)], conf)
                     plot_one_box(xyxy, frame, label=label, color=colors[int(cls)], line_thickness=3)
-            print('%sDone. (%.3fs)' % (s, t2 - t1))
+            # print('%sDone. (%.3fs)' % (s, t2 - t1))
         cv2.imshow(f'Webcam {cam_id}', frame)
         if cv2.waitKey(1) == ord('q'):
             break
@@ -95,7 +95,7 @@ def detect_realtime():
     """Main entry point for real-time detection."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default='best.pt', help='model.pt path(s)')
-    parser.add_argument('--source', type=str, default='2', help='source, e.g. 0 for webcam or rtsp/http/video path')
+    parser.add_argument('--source', type=str, default='0', help='source, e.g. 0 for webcam or rtsp/http/video path')
     parser.add_argument('--img-size', type=int, default=320, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.4, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.5, help='IOU threshold for NMS')

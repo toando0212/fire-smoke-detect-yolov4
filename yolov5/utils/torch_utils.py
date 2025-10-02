@@ -25,6 +25,22 @@ def init_seeds(seed=0):
 
 
 def select_device(device='', batch_size=None):
+    """
+    Chọn thiết bị (device) để chạy mô hình PyTorch (CPU hoặc GPU).
+
+    Hàm này thiết lập biến môi trường CUDA_VISIBLE_DEVICES và kiểm tra tính khả dụng của CUDA.
+    Nếu yêu cầu CPU, sẽ sử dụng CPU. Nếu có nhiều GPU, kiểm tra batch_size tương thích.
+
+    Args:
+        device (str): Thiết bị yêu cầu ('cpu', '0', '0,1,2,3', etc.). Mặc định là '' (tự động).
+        batch_size (int, optional): Kích thước batch để kiểm tra tương thích với số GPU.
+
+    Returns:
+        torch.device: Đối tượng device PyTorch ('cuda:0' hoặc 'cpu').
+
+    Raises:
+        AssertionError: Nếu CUDA không khả dụng nhưng được yêu cầu.
+    """
     # device = 'cpu' or '0' or '0,1,2,3'
     cpu_request = device.lower() == 'cpu'
     if device and not cpu_request:  # if device requested other than 'cpu'
@@ -52,6 +68,15 @@ def select_device(device='', batch_size=None):
 
 
 def time_synchronized():
+    """
+    Đồng bộ hóa thời gian giữa CPU và GPU, sau đó trả về thời gian hiện tại.
+
+    Hàm này gọi torch.cuda.synchronize() nếu CUDA khả dụng để đảm bảo tất cả
+    operations GPU hoàn thành trước khi đo thời gian.
+
+    Returns:
+        float: Thời gian hiện tại (seconds since epoch).
+    """
     torch.cuda.synchronize() if torch.cuda.is_available() else None
     return time.time()
 
